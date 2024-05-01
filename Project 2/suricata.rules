@@ -2,14 +2,29 @@
 drop tcp any any -> any any (msg:"SQL Injection type drop table detected"; content:"drop table"; sid:1; rev:1;)
 drop tcp any any -> any any (msg: "SQL Injection type 1=1 detected"; pcre: "/OR+( )+[0-9]+( )*+=+( )*+[0-9]+/"; sid:2;)
 
+
+# test using netcat
+
+
 #DoS ATTACK
 
 #alert udp any any -> any any (msg:"UDP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:3; rev:1;)
 #alert tcp any any -> any any (msg: "TCP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:4; rev:1;)
-alert udp any any -> 192.168.10.0/24 any (msg:"ALERT UDP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:1000001; rev:1;)
-alert tcp any any -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:1000005; rev:1;)
+alert udp any any -> 192.168.10.0/24 any (msg:"ALERT UDP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:4; rev:1;)
+alert tcp any any -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:5; rev:1;)
+#alert tcp any 4444 -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; flags:S; flow:stateless; threshold:type both, track by_dst, count 15, seconds 3; sid:3; rev:1;)
+
+#test
+#udp: hping3 -S -p 80 -2 --flood 192.168.10.6
+#tcp: hping3 -S -p 80 --flood 192.168.10.6
+
+
 
 
 #OS fingerprinting
 
-alert tcp any any -> any any (msg:"OS Fingerprinting Detected: NMAP"; flags:S;reference:url,nmap.org; sid:6; rev:1;)
+alert tcp any any -> any any (msg:"OS Fingerprinting Detected: NMAP Xmas scan"; flags:FPU;reference:url,nmap.org; sid:6; rev:1;)
+
+
+#test 
+#nmap -sX --system-dns -p 80 192.168.10.6

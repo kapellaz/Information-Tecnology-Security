@@ -46,8 +46,11 @@ iptables -P FORWARD DROP
 
 # DNS:
 
-iptables -A INPUT -p tcp --sport 53 -j ACCEPT
-iptables -A INPUT -p udp --sport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+#iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+#iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
 
 #to test:
 #	router :  nc -l -v -u -p 53
@@ -68,27 +71,51 @@ iptables -A INPUT -s 192.168.10.0/24 -p tcp --dport ssh -j ACCEPT
 
 iptables -A FORWARD -d 23.214.219.130 -p udp --dport domain -j ACCEPT
 iptables -A FORWARD -d 23.214.219.130 -p tcp --dport domain -j ACCEPT
+iptables -A FORWARD -s 23.214.219.130 -p udp --sport domain -j ACCEPT
+iptables -A FORWARD -s 23.214.219.130 -p tcp --sport domain -j ACCEPT
 
 #to test:
 #	dmz: nc -l -v -u -p 53
 #	internal: nc -v -u 23.214.219.130 53
-
+#	dmz: nc -l -v -p 53
+#	internal: nc -v 23.214.219.130 53
 
 
 # The dns server should be able to resolve names using DNS servers on the Internet (dns2 and also others):
 
 iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p udp --dport domain -j ACCEPT
 
-iptables -A FORWARD -s 87.248.214.0/24 -d 23.214.219.130 -p udp --dport domain -j ACCEPT
+#iptables -A FORWARD -s 87.248.214.0/24 -d 23.214.219.130 -p udp --dport domain -j ACCEPT
 
-iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p udp --sport domain -j ACCEPT
+#iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p udp --sport domain -j ACCEPT
 
 iptables -A FORWARD -s 87.248.214.0/24 -d 23.214.219.130 -p udp --sport domain -j ACCEPT
 
+#to test:
+#	dmz: nc -v -u 87.248.214.89 53
+#	external: nc -l -v -u -p 53
 
 
 
 # The dns and dns2 servers should be able to synchronize the contents of DNS zones: 
+iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p tcp --dport domain -j ACCEPT
+
+#iptables -A FORWARD -s 87.248.214.0/24 -d 23.214.219.130 -p udp --dport domain -j ACCEPT
+
+#iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p udp --sport domain -j ACCEPT
+
+iptables -A FORWARD -s 87.248.214.0/24 -d 23.214.219.130 -p tcp --sport domain -j ACCEPT
+
+#to test:
+#	dmz: nc -v 87.248.214.89 53
+#	internal: nc -l -v -p 53
+
+
+
+
+
+
+#smtp
 iptables -A FORWARD -d 23.214.219.132 -p tcp --dport smtp -j ACCEPT
 iptables -A FORWARD -s 23.214.219.132 -p tcp --sport smtp -j ACCEPT
 
@@ -153,8 +180,8 @@ iptables -A FORWARD -s 23.214.219.134 -d 192.168.10.0/24 -p tcp -j ACCEPT
 iptables -A FORWARD -d 23.214.219.134 -s 192.168.10.0/24 -p tcp -j ACCEPT 
 
 # test vpn client: 
-#	dmz: nc -l -v -p 1194
-#	internal: nc -v 23.214.219.134 1194
+#	dmz: nc -v 192.168.10.6 1234
+#	internal: nc -l -v -p 1234
 
 
 
@@ -282,9 +309,9 @@ iptables -A FORWARD -d 192.168.10.0/24 -p tcp --sport 60000:60099 -m conntrack -
 
 
 # preparation for suricata
-iptables - FORWARD -j NFQUEUE --queue-num 0
-
-
+#iptables -I FORWARD -j NFQUEUE --queue-num 0
+#sudo suricata -c /etc/suricata/suricata.yaml -q 0
+#sudo tail -5 /var/log/suricata/fast.log
 
 iptables-save > /etc/sysconfig/iptables
 systemctl restart iptables
