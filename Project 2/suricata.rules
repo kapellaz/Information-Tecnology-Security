@@ -12,7 +12,6 @@ drop tcp any any -> any any (msg: "SQL Injection type 1=1 detected"; pcre: "/OR+
 #alert tcp any any -> any any (msg: "TCP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:4; rev:1;)
 alert udp any any -> 192.168.10.0/24 any (msg:"ALERT UDP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:4; rev:1;)
 alert tcp any any -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:5; rev:1;)
-#alert tcp any 4444 -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; flags:S; flow:stateless; threshold:type both, track by_dst, count 15, seconds 3; sid:3; rev:1;)
 
 #test
 #udp: hping3 -S -p 80 -2 --flood 192.168.10.6

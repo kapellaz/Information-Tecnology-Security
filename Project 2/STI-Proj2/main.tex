@@ -53,13 +53,15 @@
     \clearpage
     \tableofcontents
     \clearpage
+    \listoffigures
+    \clearpage
     
 \end{titlepage}
 
 
 
 \section{Introduction}
-\quad In the evolving field of Informatics Engineering, the significance of Information Technology Security cannot be overstated. This practical assignment delves into the intricate architecture and software configurations necessary to safeguard a network infrastructure. By implementing IPTables and Suricata, we aim to establish a secure environment capable of dealing with potential threats and ensuring the integrity of our system.
+\texttt{}\par In the evolving field of Informatics Engineering, the significance of Information Technology Security cannot be overstated. This practical assignment delves into the intricate architecture and software configurations necessary to safeguard a network infrastructure. By implementing IPTables and Suricata, we aim to establish a secure environment capable of dealing with potential threats and ensuring the integrity of our system.
 
 \section{Architecture}
 
@@ -70,7 +72,7 @@
     \label{fig:network-arc}
 \end{figure}
 
-\quad To do this assignment, he needed three computers, one for the LinuxRouter and IDS, one for the DMZ and another for the internal network. The DMZ have the DNS, mail, smtp, www and vpn-gw servers and the Internal Network computer have DHCP clients, FTP server and a datastore. In each computer we will have a dedicated IP address for each of those services.\par
+\texttt{}\par To do this assignment, he needed three computers, one for the LinuxRouter and IDS, one for the DMZ and another for the internal network. The DMZ have the DNS, mail, smtp, www and vpn-gw servers and the Internal Network computer have DHCP clients, FTP server and a datastore. In each computer we will have a dedicated IP address for each of those services.\par
 \textbf{}
 \par 
 Networks:
@@ -91,7 +93,7 @@ Services IP:
 \end{itemize}
 \item DMZ
 \begin{itemize}
-\item DNS: 23.214.219.130
+\item dns: 23.214.219.130
 \item mail: 23.214.219.131
 \item smtp: 23.214.219.132
 \item www: 23.214.219.133
@@ -103,7 +105,7 @@ Services IP:
 \item DHCP Client 1: 192.168.10.2
 \item DHCP Client 2: 192.168.10.3
 \item DHCP Client 3: 192.168.10.4
-\item FTP: 192.168.10.5
+\item ftp: 192.168.10.5
 \item datastore: 192.168.10.6
 \item external network: 87.248.214.90
 \end{itemize}
@@ -112,7 +114,7 @@ Services IP:
 
 
 \section{Software}
-\quad To complete the assignment we used three virtual machines, all CentOS Stream 9. In the LinuxRouter virtual machine we needed:
+\texttt{}\par To complete the assignment we used three virtual machines, all CentOS Stream 9. In the Linux Router virtual machine we needed:
 
 \begin{itemize}
     \item suricata: the technology that we use to detect and block attacks
@@ -122,20 +124,24 @@ On the other machines we needed:
 \begin{itemize}
     \item netcat: to test most of the connections
     \item vsftp: to create ftp clients and servers
+    \item nmap: to test OS Fingerprint attacks
+    \item hping3 to test DoS attacks
 \end{itemize}
 
 \section{Concepts}
 \subsection{IPTables}
-\quad IPTables is a firewall that works by matching each packet that crosses the networking interface against a set of rules to decide what to do.\par
-The rules define the characteristics that a packet need to have to be a match and the action to be taken.
+\texttt{}\par
+IPTables is a firewall that works by matching each packet that crosses the networking interface against a set of rules to decide what to do.\par
+The rules define the characteristics that a packet needs to have to be a match and the action to be taken.
 Those rules are saved in tables. There are three tables in IPTables, \textit{nat, filter and mangle}. In this project we will only work with the first two.\par
-The rules inside the tables are grouped in \textbf{chains} and users can create chains as needed, but in our case it was not necessary. In the table \textit{filter} three default chains: \textbf{INPUT,OUTPUT, FORWARD}. The chain \textbf{INPUT} handles the packets addressed to the router, the chain \textbf{OUTPUT} handles the traffic created by our router and the chain \textbf{FORWARD} handles the traffic that needs to be redirected by the router to another system. In the table \textit{nat} we have the chains \textbf{POSTROUTING} and \textbf{PREROUTING}. The \textbf{PREROUTING} chain is for altering packets before they are routed. It is used for \textbf{DNAT} for incoming traffic. The \textbf{POSTROUTING} chain is for altering packets as they are leaving the system. It is used for SNAT or outgooing traffic.\par
+The rules inside the tables are grouped in \textbf{chains} and users can create chains as needed, but in our case it was not necessary. In the table \textit{filter} there are three default chains: \textbf{INPUT},\textbf{OUTPUT} and \textbf{FORWARD}. The chain \textbf{INPUT} handles the packets addressed to the router, the chain \textbf{OUTPUT} handles the traffic created by our router and the chain \textbf{FORWARD} handles the traffic that needs to be redirected by the router to another system. In the table \textit{nat} we have the chains \textbf{POSTROUTING} and \textbf{PREROUTING}. The \textbf{PREROUTING} chain is for altering packets before they are routed. It is used for \textbf{DNAT} for incoming traffic. The \textbf{POSTROUTING} chain is for altering packets as they are leaving the system. It is used for SNAT for outgoing traffic.\par
 The rules have actions that define if a packet is dropped/rejected (\textbf{DROP}) or if a packet can proceed to his destination (\textbf{ACCEPT}).
 
 
 \subsection{Suricata}
 \label{subsec:suricata}
-\quad Suricata is a open source network analysis and threat detection software used by multiple organizations. By default, suricata runs as an Intrusion Detection System (IDS), that means that it only generates alerts and logs of suspicious activity. We are going to configure it to also be in Intrusion Prevention System(IPS) so it can also drop the suspicious traffic. We are also going to use Suricata in inline mode, that is a mode where the packets are sent from IPTables to Suricata using a Queue and if a packet in the queue have some characteristic that matches one of the suricata's rules it will be dropped. The rules follow a format wich is as follows:\par
+\texttt{}\par
+Suricata is a open source network analysis and threat detection software used by multiple organizations. By default, suricata runs as an Intrusion Detection System (IDS), that means that it only generates alerts and logs of suspicious activity. We are going to configure it to also be in Intrusion Prevention System(IPS) so it can also drop the suspicious traffic. We are also going to use Suricata in inline mode, that is a mode where the packets are sent from IPTables to Suricata using a queue (\textbf{NFQUEUE}) and if a packet in the queue have some characteristic that matches one of the suricata's rules it will be dropped. The rules follow a format wich is as follows:\par
 \begin{center}
 \textbf{action protocol source(ports) $\rightarrow$ destination(ports) options}
 \end{center} \par
@@ -144,14 +150,16 @@ The actions are what determines what happens when a signature matches, the proto
 
 
 \section{IPTables Configuration}
-\quad In this section we are going to show how we configured out firewall in order to meet the assignment requirements.
+\texttt{}\par In this section we are going to show how we configured out firewall in order to meet the assignment's requirements.
 
 \subsection{Firewall configuration to protect the router}
-\quad Here we want the firewall to be configured so that it should drop all communications entering the router system except the ones we are going to describe next. But first we need to change the \textbf{INPUT} chain policy to \textbf{DROP}, which means that the default action for every packet that does not match a rule in this chain is \textbf{DROP}. \par
+\texttt{}\par Here we want the firewall to be configured so that it should drop all communications entering the router system except the ones we are going to describe next. But first we need to change the \textbf{INPUT} chain policy to \textbf{DROP}, which means that the default action for every packet that does not match a rule in this chain is \textbf{DROP}. \par
+\texttt{}\par
 \texttt{iptables -P INPUT DROP}
 
 \subsubsection{DNS name resolution requests sent to outside servers}
-\quad Since DNS uses both TCP and UDP protocols we made rules for both of those protocols in order to accept the incoming and outgoing DNS packets.\par
+\texttt{}\par
+Since DNS uses both TCP and UDP protocols we made rules for both of those protocols in order to accept the incoming and outgoing DNS packets.\par
 \texttt{}\par
 \texttt{iptables -A INPUT -p tcp --dport 53 -j ACCEPT}\par
 \texttt{iptables -A INPUT -p udp --dport 53 -j ACCEPT}\par
@@ -183,13 +191,21 @@ And the results were:
 \end{figure}
 
 \subsubsection{SSH connections to the router system, if originated at the internal network or at the VPN gateway (vpn-gw).} 
-\quad Here, we want to accept connections from the internal network (192.168.10.0/24) and from the VPN server (23.214.219.134) that use the SSH port.\par
+\texttt{}\par
+Here, we want to accept connections from the internal network (192.168.10.0/24) and from the VPN server (23.214.219.134) that use the SSH port.\par
 \texttt{}\par
 \texttt{iptables -A INPUT -s 23.214.219.134 -p tcp --dport ssh -j ACCEPT}\par
-\texttt{iptables -A INPUT -s 192.168.10.0/24 -p tcp --dport ssh -j ACCEPT}
+\texttt{iptables -A INPUT -s 192.168.10.0/24 -p tcp --dport ssh -j ACCEPT}\par
 \texttt{}\par
 
-In order to test these we used the ssh command:
+In order to test these we used the ssh command:\par
+\texttt{}\par
+DMZ (vpn-gw): \texttt{ssh rui@23.214.219.254} \par
+Internal network: \texttt{ssh rui@192.168.10.254} \par
+\texttt{}\par
+\texttt{}\par
+
+
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{in/in_ssh_dmz.png}
@@ -207,8 +223,8 @@ In order to test these we used the ssh command:
 
 
 \subsection{Firewall configuration to authorize direct communications (without NAT)}
-
-\quad Here, we want our firewall to drop all communications between networks, which we did with the command:\par
+\texttt{}\par
+Here, we want our firewall to drop all communications between networks, which we did with the command:\par
 \texttt{}\par
 \texttt{iptables -P FORWARD DROP}\par
 \texttt{}\par
@@ -252,7 +268,8 @@ Internal Network TCP: \texttt{nc -v 23.214.219.130 53} \par
 
 
 \subsubsection{ The dns server should be able to resolve names using DNS servers on the Internet (dns2 and also others)}
-\quad Here we are allowing the dns server to access the Internet to resolve names.
+\texttt{}\par
+Here we are allowing the dns server to access the Internet to resolve names.
 
 \texttt{}\par
 \texttt{iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p udp --dport domain -j ACCEPT}\par
@@ -282,7 +299,8 @@ External Network: \texttt{nc -l -v -u -p 53} \par
 
 
 \subsubsection{ The dns and dns2 servers should be able to synchronize the contents of DNS zones.}
-\quad In order to synchronize the contents of DNS zones we can use TCP ports, so the rules will be the same as before but with the port TCP instead of UDP.
+\texttt{}\par
+In order to synchronize the contents of DNS zones we can use TCP ports, so the rules will be the same as before but with the port TCP instead of UDP.
 
 \texttt{}\par
 \texttt{iptables -A FORWARD -s 23.214.219.130 -d 87.248.214.0/24 -p tcp --dport domain -j ACCEPT}\par
@@ -312,7 +330,7 @@ External Network: \texttt{nc -l -v -p 53} \par
 
 \subsubsection{SMTP connections to the smtp server}
 
-\quad To allow SMTP (Simple Mail Transfer Protocol) to send and receive messages we created the following rules:
+\texttt{}\par To allow SMTP (Simple Mail Transfer Protocol) to send and receive messages we created the following rules:
 
 \texttt{}\par
 \texttt{iptables -A FORWARD -d 23.214.219.132 -p tcp --dport smtp -j ACCEPT}\par
@@ -341,7 +359,7 @@ Internal Network: \texttt{nc -v 23.214.219.132 25} \par
 \end{figure}
 
 \subsubsection{POP and IMAP connections to the mail server.}
-\quad 
+\texttt{}\par 
 To allow POP3 (Post Office Protocol 3) and IMAP (Internet Message Access Protocol)  we created the following rules:
 
 \texttt{}\par
@@ -383,8 +401,8 @@ Internal Network IMAP: \texttt{nc -v 23.214.219.131 143} \par
 
 
 \subsubsection{HTTP and HTTPS connections to the www server}
-
-To allow POP3 (Post Office Protocol 3) and IMAP (Internet Message Access Protocol)  we created the following rules:
+\texttt{}\par
+To allow HTTP and HTTPS we created the following rules:
 
 \texttt{}\par
 \texttt{iptables -A FORWARD -d 23.214.219.133 -p tcp --dport http -j ACCEPT}\par
@@ -425,7 +443,7 @@ Internal Network HTTPS: \texttt{nc -v 23.214.219.133 443} \par
 
 \subsubsection{OpenVPN connections to the vpn-gw server}
 
-\quad To enable connections from the OpenVPN (open-source virtual private network) we created the following rules:
+\texttt{}\par To enable connections from the OpenVPN (open-source virtual private network) we created the following rules:
 
 \texttt{}\par
 \texttt{iptables -A FORWARD -d 23.214.219.134 -p tcp --dport openvpn -j ACCEPT}\par
@@ -456,7 +474,7 @@ Internal Network: \texttt{nc -v 23.214.219.134 1194} \par
 
 \subsubsection{VPN clients connected to the gateway (vpn-gw) should be able to connect to all services in the Internal network (assume 
 the gateway does SNAT/MASQUERADING for communications received from clients).}
-\quad Here we want to allow all users connected to the vpn server to have access to the services in the internal network, so the next rules were created:
+\texttt{}\par Here we want to allow all users connected to the vpn server to have access to the services in the internal network, so the next rules were created:
 
 
 \texttt{}\par
@@ -489,11 +507,11 @@ Internal Network (datastore): \texttt{nc -l -v -p 1234} \par
 
 
 \subsection{Firewall configuration for connections to the external IP address of the firewall (using NAT)}
-\quad In this part of the assignment we want to authorize all connections originated in the outside and destined to the external IP address. So we are going to use DNAT.
+\texttt{}\par In this part of the assignment we want to authorize all connections originated in the outside and destined to the external IP address. So we are going to use DNAT.
 
 
 \subsubsection{FTP connections (in passive and active modes) to the ftp server}
-\quad Here we want to configure our firewall in order to allow FTP connections in passive and active modes. The case of FTP is different than what we've done for the other protocols, since with the other protocols we only worry about one port, and in this case we need to create rules to port 20 (ftp), 21 (ftp-data) and 60000:60099 (range of high ports that we defined in the ftp server configuration) and then use DNAT to redirect the ftp connections to the external IP address to the ftp server in the internal network. To do so, we use the following commands:
+\texttt{}\par Here we want to configure our firewall in order to allow FTP connections in passive and active modes. The case of FTP is different than what we've done for the other protocols, since with the other protocols we only worry about one port, and in this case we need to create rules to port 20 (ftp), 21 (ftp-data) and 60000:60099 (range of high ports that we defined in the ftp server configuration) and then use DNAT to redirect the ftp connections to the external IP address to the ftp server in the internal network. To do so, we use the following commands:
 
 \texttt{}\par
 \texttt{iptables -t nat -A PREROUTING -s 87.248.214.0/24 -d 87.248.214.97 -p tcp --dport ftp -j DNAT --to-destination 192.168.10.5}\par
@@ -511,9 +529,9 @@ Internal Network (datastore): \texttt{nc -l -v -p 1234} \par
 
 In addicion to the rules, we need some commands which are:
 \begin{itemize}
-    \item \texttt{modprobe nf_conntrack_ftp}
-    \item \texttt{modprobe nf_nat_ftp}
-    \item \texttt{echo 1 > /proc/sys/net/netfilter/nf_conntrack_helper}
+    \item \texttt{modprobe nf\_conntrack\_ftp}\par
+    \item \texttt{modprobe nf\_nat\_ftp}\par
+    \item \texttt{echo 1 > /proc/sys/net/netfilter/nf\_conntrack\_helper}\par
 \end{itemize}
 
 In order to test these we created an ftp server in the internal network using vsftp and connected to the router's external ip from a external ip address:
@@ -529,7 +547,7 @@ External Network: \texttt{ftp 87.248.214.97} \par
 \end{figure}
 
 \subsubsection{SSH connections to the datastore server, but only if originated at the eden or dns2 servers}
-\quad Here, we want to create rules that allow connections from the eden and dns2 servers to the datastore server in the internal network using DNAT.
+\texttt{}\par Here, we want to create rules that allow connections from the eden and dns2 servers to the datastore server in the internal network using DNAT.
 
 \texttt{}\par
 \texttt{iptables -t nat -A PREROUTING -s 193.136.212.1 -d 87.248.214.97 -p tcp --dport ssh -j DNAT --to-destination 192.168.10.6}\par
@@ -540,7 +558,8 @@ External Network: \texttt{ftp 87.248.214.97} \par
 \texttt{iptables -A FORWARD -s 192.168.10.6 -d 193.137.16.75 -p tcp --sport ssh -j ACCEPT}\par
 \texttt{}\par
 
-In order to test these, we created new rules to simulate eden and dns2 servers (the rules are all the same, the only thing changing is the ip address of the source of the connection):
+In order to test these, we created new rules to simulate eden and dns2 servers (the rules are all the same, the only thing changing is the ip address of the source of the connection):\par
+\texttt{}\par
 
 \texttt{iptables -t nat -A PREROUTING -s 87.248.214.89 -d 87.248.214.97 -p tcp --dport ssh -j DNAT --to-destination 192.168.10.6}\par
 \texttt{iptables -A FORWARD -s 87.248.214.89 -d 192.168.10.6 -p tcp --dport ssh -j ACCEPT}\par
@@ -562,9 +581,9 @@ External Network: \texttt{ssh rui@87.248.214.97} \par
 
 
 \subsection{Firewall configuration for communications from the internal network to the outside (using NAT)}
-\quad In this part of the assignment we want to authorize all connections originated in the internal network and destined to the outside. So we are going to use SNAT.
+\texttt{}\par In this part of the assignment we want to authorize all connections originated in the internal network and destined to the outside. So we are going to use SNAT.
 \subsubsection{Domain name resolutions using DNS}
-\quad Here we want to allow dns requests from the internal network to the Internet, using SNAT.
+\texttt{}\par Here we want to allow dns requests from the internal network to the Internet, using SNAT.
 
 
 \texttt{}\par
@@ -606,7 +625,7 @@ Internal Network TCP: \texttt{nc -v 87.248.214.89 53} \par
 
 
 \subsubsection{HTTP, HTTPS and SSH connections}
-\quad Now we need to create rules to allow http, https and ssh traffic that comes from the internal network to Internet using SNAT.
+\texttt{}\par Now we need to create rules to allow http, https and ssh traffic that comes from the internal network to Internet using SNAT.
 
 \texttt{}\par
 \texttt{iptables -t nat -A POSTROUTING -p tcp -s 192.168.10.0/24 -d 192.168.93.0/24 --dport http -j SNAT --to-source 192.168.93.128 }\par
@@ -662,7 +681,7 @@ Internal Network SSH: \texttt{ssh rui@87.248.214.89} \par
 \end{figure}
 
 \subsubsection{FTP connections (in passive and active modes) to external FTP servers}
-\quad In this topic we want to allow ftp connections from the internal network to an external network ftp server.
+\texttt{}\par In this topic we want to allow ftp connections from the internal network to an external network ftp server.
 
 \texttt{}\par
 \texttt{iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -d 87.248.214.0/24 -p tcp --dport ftp -j SNAT --to-source 87.248.214.97}\par
@@ -692,7 +711,7 @@ Internal Network: \texttt{ftp 87.248.214.89} \par
 
 
 \section{Suricata}
-\quad The last requirement of this assignment is to enable in the firewall system, the capability to detect and react to security attacks. To be more specific, we want to be able to detect and react to the following attacks:
+\texttt{}\par The last requirement of this assignment is to enable in the firewall system, the capability to detect and react to security attacks. To be more specific, we want to be able to detect and react to the following attacks:
 \begin{itemize}
     \item Two types of SQL injection.
     \item Two types of DoS (Denial of Service) attacks.
@@ -700,7 +719,7 @@ Internal Network: \texttt{ftp 87.248.214.89} \par
 \end{itemize}
 
 \subsection{Suricata configuration}
-\quad TO configure suricata we need to add our rules to a file and specify in the suricata.yaml file where the rules are. In addiction to that, in the same yaml file we need to change the capture settings in the \texttt{af_packet} section, and the network information in \texttt{HOME_NET}.
+\texttt{}\par TO configure suricata we need to add our rules to a file and specify in the suricata.yaml file where the rules are. In addiction to that, in the same yaml file we need to change the capture settings in the \texttt{af\_packet} section, and the network information in \texttt{HOME\_NET}.
 
 
 
@@ -708,7 +727,7 @@ Internal Network: \texttt{ftp 87.248.214.89} \par
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{suricata/config_home_net.png}
-    \caption{HOME_NET}
+    \caption{HOME\_NET}
     \label{fig:network-arc}
 \end{figure}
 
@@ -716,7 +735,7 @@ Internal Network: \texttt{ftp 87.248.214.89} \par
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{suricata/config_af_packet.png}
-    \caption{af-packet}
+    \caption{af\_packet}
     \label{fig:network-arc}
 \end{figure}
 
@@ -743,8 +762,8 @@ And now we add the rules to the suricata.rules file:
     
 
     \item DOS atacks:\par
-    \texttt{alert udp any any -> 192.168.10.0/24 any (msg:"ALERT UDP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:1000001; rev:1;)}\par
-    \texttt{alert tcp any any -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; threshold:type both, track by_dst, count 15, seconds 3; sid:1000005; rev:1;)}\par
+    \texttt{alert udp any any -> 192.168.10.0/24 any (msg:"ALERT UDP Flood"; threshold:type both, track by\_dst, count 15, seconds 3; sid:1000001; rev:1;)}\par
+    \texttt{alert tcp any any -> 192.168.10.0/24 any (msg:"ALERT TCP Flood"; threshold:type both, track by\_dst, count 15, seconds 3; sid:1000005; rev:1;)}\par
 
     \texttt{}\par
     Here we are detecting both TCP and UDP flooding attacks.\par
@@ -769,6 +788,7 @@ Then we have the \textbf{msg} that is what appears when Suricata detects that ty
 \subsection{Tests}
 
 In order to test those rules we need to start suricata and connect it to the queue (NFQUEUE) using the command:\par
+\texttt{}\par
 \texttt{sudo suricata -c /etc/suricata/suricata.yaml -q 0}\par
 \texttt{}\par
 
@@ -904,7 +924,7 @@ To test OS fingerprint attacks we use nmap:\par
 
 
 \section{Conclusion}
-\quad To conclude, this assignment has successfully demonstrated the practical application of IPTables and Suricata in creating a secure network environment. With it we learn how to create IPTables rules and create rules to detect sql injection, dos and os fingerprint attacks. To validate our configuration we did a set of tests and with that we believe that the assignment requirements were sucessfully implemented.
+\texttt{}\par To conclude, this assignment has successfully demonstrated the practical application of IPTables and Suricata in creating a secure network environment. With it we learn how to create IPTables rules and create rules to detect sql injection, dos and os fingerprint attacks. To validate our configuration we did a set of tests and with that we believe that the assignment requirements were sucessfully implemented.
 
 
 
