@@ -309,7 +309,9 @@ iptables -A FORWARD -d 192.168.10.0/24 -p tcp --sport 60000:60099 -m conntrack -
 
 
 # preparation for suricata
-#iptables -I FORWARD -j NFQUEUE --queue-num 0
+iptables -I FORWARD -j NFQUEUE --queue-num 0
+iptables-save > /etc/sysconfig/iptables
+systemctl restart iptables
 #sudo suricata -c /etc/suricata/suricata.yaml -q 0
 #sudo tail -5 /var/log/suricata/fast.log
 
